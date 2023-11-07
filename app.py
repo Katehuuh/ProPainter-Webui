@@ -35,7 +35,7 @@ def get_meta_from_video(input_video):
     if input_video is None:
         return None, None, None, ""
 
-    print("获取输入视频的元信息")
+    print("Get the meta information of the input video")
     cap = cv2.VideoCapture(input_video)
 
     _, first_frame = cap.read()
@@ -106,7 +106,7 @@ def undo_click_stack_and_refine_seg(Seg_Tracker, origin_frame, click_stack, aot_
     if Seg_Tracker is None:
         return Seg_Tracker, origin_frame, [[], []]
 
-    print("撤销！")
+    print("Quash!")
     if len(click_stack[0]) > 0:
         click_stack[0] = click_stack[0][:-1]
         click_stack[1] = click_stack[1][:-1]
@@ -172,18 +172,18 @@ def add_new_object(Seg_Tracker):
     Seg_Tracker.update_origin_merged_mask(prev_mask)
     Seg_Tracker.curr_idx += 1
 
-    print("开始准备添加新对象！")
+    print("Start preparing to add new objects!")
 
     return Seg_Tracker, [[], []]
 
 
 def tracking_objects(Seg_Tracker, input_video, input_img_seq=None, frame_num=0):
-    print("开始追踪")
+    print("Start tracking")
     return tracking_objects_in_video(Seg_Tracker, input_video, input_img_seq, frame_num)
 
 
 def remove_watermark(input_video):
-    print("开始去除水印")
+    print("Start removing the watermark")
     print('cwd', os.getcwd())
     os.chdir('./ProPainter')
     print('cwd', os.getcwd())
@@ -221,10 +221,10 @@ def seg_track_app():
     with app:
         gr.Markdown('''
             <div style="text-align:center;">
-                <span style="font-size:3em; font-weight:bold;">视频去水印</span>
+                <span style="font-size:3em; font-weight:bold;">Video watermark removal</span>
             </div>
             ''')
-        gr.Markdown('## 第一步：生成蒙版')
+        gr.Markdown('## Step 1: Generate a mask')
         click_stack = gr.State([[], []])  # Storage clicks status
         origin_frame = gr.State(None)
         Seg_Tracker = gr.State(None)
@@ -236,9 +236,9 @@ def seg_track_app():
 
         with gr.Row():
             # video input
-            input_video = gr.Video(label='待处理视频', height=400)
+            input_video = gr.Video(label='Pending video', height=400)
 
-            input_first_frame = gr.Image(label='选择蒙版对象', interactive=True, height=400)
+            input_first_frame = gr.Image(label='Select the mask object', interactive=True, height=400)
 
         with gr.Row():
             with gr.Column():
@@ -251,7 +251,7 @@ def seg_track_app():
                                               interactive=True)
 
                         # args for modify and tracking
-                        click_undo_but = gr.Button(value="撤销", interactive=True)
+                        click_undo_but = gr.Button(value="Cancel", interactive=True)
 
             with gr.Column():
                 with gr.Tab(label="SegTracker Args", visible=False):
@@ -299,21 +299,21 @@ def seg_track_app():
                                                       visible=False)
 
         with gr.Row():
-            new_object_button = gr.Button(value="添加新对象", interactive=True)
+            new_object_button = gr.Button(value="Add new object", interactive=True)
             reset_button = gr.Button(
-                value="重置",
+                value="Reset",
                 interactive=True,
             )
             track_for_video = gr.Button(
-                value="开始追踪",
+                value="Start tracking",
                 interactive=True,
             )
 
         output_video = gr.Video(label='Output video', height=400)
 
-        gr.Markdown('## 第二步：去除水印')
-        start_remove_watermark = gr.Button(value="去水印", interactive=True)
-        final_video = gr.Video(label='去除后视频', height=400)
+        gr.Markdown('## Step 2: Remove the watermark')
+        start_remove_watermark = gr.Button(value="Remove the watermark", interactive=True)
+        final_video = gr.Video(label='After removing the video', height=400)
 
         ##########################################################
         ######################  back-end #########################

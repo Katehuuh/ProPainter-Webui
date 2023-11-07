@@ -6,30 +6,41 @@ A webui that you can easily pick up objects from the video and eliminate them.
 ![](./demo.gif)
 
 ## Getting started
+Fork: english UI.\
 If you don't want to install the environment, you can download the package directly.\
 link [百度网盘](https://pan.baidu.com/s/1XkQhzCzTtzVfgQg5heQQrA?pwd=jo38 )\
 tutorial [bilibili](https://www.bilibili.com/video/BV1NH4y1o7mS/) [youtube](https://www.youtube.com/watch?v=CcivHjbHIcQ)
 
 ### clone repo
 ```
-git clone git@github.com:halfzm/ProPainter-Webui.git
+git clone https://github.com/Katehuuh/ProPainter-Webui.git && cd ProPainter-Webui
 ```
 
-### create conda enviroment
+### create enviroment
 ```
-conda create -n propainter python=3.10
-conda activate propainter
+python -m venv venv && venv\Scripts\activate
 ```
 
 ### install dependencies
-Just follow the instructions in [Segment-ant-Track-Anything](https://github.com/z-x-yang/Segment-and-Track-Anything)
- 和 [ProPainter](https://github.com/sczhou/ProPainter)（P.S.Don't need to install groundingdino, I have put it in the project.）
-```
+~~Just follow the instructions in [Segment-ant-Track-Anything](https://github.com/z-x-yang/Segment-and-Track-Anything)
+ and [ProPainter](https://github.com/sczhou/ProPainter)（P.S.Don't need to install groundingdino, I have put it in the project.）~~
+
+<details><summary>Install <a href="https://pytorch.org/get-started/locally/">PyTorch</a> and follow the instructions, click to see more details</summary><br>
+
+```cmd
+pip3 install -r ProPainter\requirements.txt
+pip3 install -e ./sam
 pip install -r requirements.txt
+
+# Optional
+git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git && cd Pytorch-Correlation-extension
+python setup.py install
+cd ..
 ```
+</details>
 
 ### prepare pretrained models
-Download all the needed models for propainter \
+~~Download all the needed models for propainter,~~ Models auto-download on first run. \
 [propainter](https://github.com/sczhou/ProPainter/releases/download/v0.1.0/ProPainter.pth)\
 [raft-things](https://github.com/sczhou/ProPainter/releases/download/v0.1.0/raft-things.pth)\
 [recurrent_flow_completion](https://github.com/sczhou/ProPainter/releases/download/v0.1.0/recurrent_flow_completion.pth)\
