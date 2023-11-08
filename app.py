@@ -189,20 +189,22 @@ def remove_watermark(input_video):
     print('cwd', os.getcwd())
     inference = resolve_relative_path('./ProPainter/inference_propainter.py')
 
-    video_name = os.path.basename(input_video).split('.')[0].split('_')[0]
+    video_name = os.path.basename(input_video).rsplit('.', 1)[0].rsplit('_', 1)[0]
     output_base_path = resolve_relative_path('./output/')
     output_path = f'{output_base_path}/{video_name}/'
     mask = f'{output_path}/{video_name}_masks/'
-
+    
     command = f'python {inference} --video {input_video} --mask {mask}  --output {output_path} --fp16 --subvideo_length 50'
     print(command)
+    while len(os.listdir(mask)) > int(cv2.VideoCapture(input_video).get(cv2.CAP_PROP_FRAME_COUNT)): os.remove(os.path.join(mask, sorted(os.listdir(mask))[-1]))
+
     result = subprocess.run(command, shell=True)
 
     if result.returncode != 0:
         error_message = result.stderr.decode('utf-8', 'ignore')
-        print(f"错误 {error_message}")
+        print(f"Error {error_message}")
     else:
-        print("成功")
+        print("Success")
     file_name = input_video.split('\\')[-1].split('.')[0]
     print(file_name)
     os.chdir(resolve_relative_path('./'))
@@ -268,7 +270,7 @@ def seg_track_app():
                                         minimum=1,
                                         step=1,
                                         maximum=9999,
-                                        value=100,
+                                        value=9999,
                                         interactive=True,
                                         visible=False)
 
