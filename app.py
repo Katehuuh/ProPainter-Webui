@@ -58,7 +58,7 @@ def check_vram_requirements(input_video):
 
     pixels = np.array([1280*720, 720*480, 640*480, 320*240, 1280*720, 720*480, 640*480, 320*240, 640*368, 512*512, 1280*720])
     frames = np.array([50, 50, 50, 50, 80, 80, 80, 80, 750, 120, 750])
-    vram_used = np.array([28, 11, 10, 3, 19, 7, 6, 2, 23, 7, 25])
+    vram_used = np.array([28, 11, 10, 3, 19, 7, 6, 2, 30, 7, 25])
 
     X = np.stack((pixels, frames), axis=-1)
     X_transformed = np.hstack((X, X**2, X**3)) # polynomial transformation
