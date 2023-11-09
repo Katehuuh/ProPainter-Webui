@@ -48,22 +48,11 @@ def get_meta_from_video(input_video):
     return first_frame, first_frame, first_frame, ""
 
 
-
-class MLP(torch.nn.Module):
-    def __init__(self):
-        super(MLP, self).__init__()
-        self.hidden = torch.nn.Linear(5, 10)
-        self.relu = torch.nn.ReLU()
-        self.output = torch.nn.Linear(10, 1)
-
-    def forward(self, x):
-        x = self.relu(self.hidden(x))
-        return self.output(x)
+import cv2
+import numpy as np
+import torch
 
 def check_vram_requirements(input_video):
-    # Set a seed for the random number generator
-    torch.manual_seed(18)
-
     cap = cv2.VideoCapture(input_video)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -72,54 +61,15 @@ def check_vram_requirements(input_video):
     current_free_vram = round(torch.cuda.mem_get_info()[0] / (1024 ** 3), 1)
     print("frame_count: " + str(frame_count) + " frame_width: " + str(frame_width) + " frame_height: " + str(frame_height))
 
-    # data arrays.
-    pixels = torch.tensor([1280*720, 720*480, 640*480, 320*240, 1280*720, 720*480, 640*480, 320*240, 640*368]).float()
-    frames = torch.tensor([50, 50, 50, 50, 80, 80, 80, 80, 750]).float()
-    vram_used = torch.tensor([28, 11, 10, 3, 19, 7, 6, 2, 16]).float()
+    # Data arrays.
+    pixels = np.array([1280*720, 720*480, 640*480, 320*240, 1280*720, 720*480, 640*480, 320*240, 640*368])
+    frames = np.array([50, 50, 50, 50, 80, 80, 80, 80, 750])
+    vram_used = np.array([28, 11, 10, 3, 19, 7, 6, 2, 16])
 
-    # Prepare your data
-    X = torch.stack([pixels, frames, pixels*frames, pixels**2, frames**2], dim=1)
-    y = vram_used.view(-1, 1)
+    required_vram = np.interp(frame_count, frames, vram_used)
 
-    # Normalize the features and the target variable
-    X_mean = X.mean(dim=0)
-    X_std = X.std(dim=0)
-    X = (X - X_mean) / X_std
+    return required_vram, current_free_vram
 
-    y_mean = y.mean()
-    y_std = y.std()
-    y = (y - y_mean) / y_std
-
-    # Define model
-    model = MLP()
-
-    # Define loss function and optimizer
-    criterion = torch.nn.MSELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-
-    # Train the model
-    for epoch in range(1000):
-        y_pred = model(X)
-        loss = criterion(y_pred, y)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-    # Print the weights and biases
-    for name, param in model.named_parameters():
-        print(name, param.data)
-
-    # Prepare the input for prediction
-    input = torch.tensor([frame_width*frame_height, frame_count, frame_width*frame_height*frame_count, (frame_width*frame_height)**2, frame_count**2]).float()
-    input = (input - X_mean) / X_std
-
-    # Predict the VRAM usage for the input video
-    required_vram = model(input.unsqueeze(0))
-
-    # Convert the prediction back to the original scale
-    required_vram = required_vram * y_std + y_mean
-    
-    return required_vram.item(), current_free_vram
 
 def SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask):
     with torch.cuda.amp.autocast():
