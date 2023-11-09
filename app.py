@@ -43,14 +43,10 @@ def get_meta_from_video(input_video):
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_BGR2RGB)
 
     required_vram, current_gpu_memory = check_vram_requirements(input_video)
-    print(f"Estimated VRAM requirement: {required_vram}/{current_gpu_memory} GB")
+    if required_vram > current_gpu_memory:
+        print(f"WARNING: Insufficient VRAM. the video is either too long or has too high a resolution. Try using a video with a smaller size.")
 
     return first_frame, first_frame, first_frame, ""
-
-
-import cv2
-import numpy as np
-import torch
 
 def check_vram_requirements(input_video):
     cap = cv2.VideoCapture(input_video)
@@ -59,17 +55,20 @@ def check_vram_requirements(input_video):
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     cap.release()
     current_free_vram = round(torch.cuda.mem_get_info()[0] / (1024 ** 3), 1)
-    print("frame_count: " + str(frame_count) + " frame_width: " + str(frame_width) + " frame_height: " + str(frame_height))
 
-    # Data arrays.
-    pixels = np.array([1280*720, 720*480, 640*480, 320*240, 1280*720, 720*480, 640*480, 320*240, 640*368])
-    frames = np.array([50, 50, 50, 50, 80, 80, 80, 80, 750])
-    vram_used = np.array([28, 11, 10, 3, 19, 7, 6, 2, 16])
+    pixels = np.array([1280*720, 720*480, 640*480, 320*240, 1280*720, 720*480, 640*480, 320*240, 640*368, 512*512, 1280*720])
+    frames = np.array([50, 50, 50, 50, 80, 80, 80, 80, 750, 120, 750])
+    vram_used = np.array([28, 11, 10, 3, 19, 7, 6, 2, 23, 7, 25])
 
-    required_vram = np.interp(frame_count, frames, vram_used)
+    X = np.stack((pixels, frames), axis=-1)
+    X_transformed = np.hstack((X, X**2, X**3)) # polynomial transformation
+    coefficients, _, _, _ = np.linalg.lstsq(X_transformed, vram_used, rcond=None)
+    x = np.array([frame_width * frame_height, frame_count])
+    x_transformed = np.hstack((x, x**2, x**3))
+    required_vram = round(np.dot(coefficients, x_transformed), 1)
 
+    print(f"VRAM Est. {required_vram}/{current_free_vram} GB | Px: {frame_width}*{frame_height} - Frames: {frame_count}")
     return required_vram, current_free_vram
-
 
 def SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask):
     with torch.cuda.amp.autocast():
