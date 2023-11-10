@@ -218,7 +218,7 @@ def remove_watermark(input_video):
     output_path = f'{output_base_path}/{video_name}/'
     mask = f'{output_path}/{video_name}_masks/'
     
-    command = f'python {inference} --video {input_video} --mask {mask}  --output {output_path} --fp16 --subvideo_length 50'
+    command = f'python "{inference}" --video "{input_video}" --mask "{mask}"  --output "{output_path}" --fp16 --subvideo_length 50'
     print(command)
     while len(os.listdir(mask)) > int(cv2.VideoCapture(input_video).get(cv2.CAP_PROP_FRAME_COUNT)): os.remove(os.path.join(mask, sorted(os.listdir(mask))[-1]))
 
@@ -404,7 +404,7 @@ def seg_track_app():
                              outputs=[Seg_Tracker, input_first_frame, click_stack])
 
     app.queue(concurrency_count=1)
-    app.launch(debug=True, enable_queue=True, share=True)
+    app.launch(debug=True, share=True)
 
 
 if __name__ == "__main__":
